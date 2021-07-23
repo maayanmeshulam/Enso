@@ -7,26 +7,25 @@ const imageExpressRoute = express.Router();
 // User schema
 let ImageSchema = require('../model/image.model');
 
+
 // Get images 
-//*************** Add pagintion and sorting by date ***************
 imageExpressRoute.route('/image').get((req, res) => {
-    if (typeof req.query.imageName !== 'undefined' ){
-        ImageSchema.findOne({name: req.query.imageName}, (error, data) => {
-            if (error) {
-                return next(error)
-            } else {
-                res.json(data)
-            }
-        })
-    } else {
-        ImageSchema.find((error, data) => {
-            if (error) {
-                return next(error)
-            } else {
-                res.json(data)
-            }
-        })
+    const pageOptions = {
+        page: parseInt(req.query.page, 10) || 0,
+        limit: parseInt(req.query.limit, 10) || 2
     }
+    ImageSchema.find()
+    .skip(pageOptions.page * pageOptions.limit)
+    .limit(pageOptions.limit)
+    .sort({updatedAt: -1})
+    .exec((error, data) => {
+        if (error) {
+            return next(error)
+        } else {
+            res.json(data)
+        }
+    })
+
 })
 
 // Create image
@@ -42,23 +41,23 @@ imageExpressRoute.route('/image').get((req, res) => {
 
 
 // Get single image
-// imageExpressRoute.route('/image/:id').get((req, res) => {
-//     ImageSchema.findById(req.params.id, (error, data) => {
-//         if (error) {
-//             return next(error)
-//         } else {
-//             res.json(data)
-//         }
-//     })
-// })
+imageExpressRoute.route('/image/:imageName').get((req, res) => {
+    ImageSchema.findOne({name: req.params.imageName}, (error, data) => {
+        if (error) {
+            return next(error)
+        } else {
+            res.json(data)
+        }
+    })
+})
 
 
 // Update image
 // if does not exist, create it
-//*************** need to check the required fields?? ***************
+//*************** need to check the required fields ***************
 imageExpressRoute.route('/image').put((req, res, next) => {
-    ImageSchema.findOneAndUpdate({name: req.body.name}, {$set: req.body}, {upsert: true},
-         (error, data) => {
+    ImageSchema.findOneAndUpdate({name: req.body.name}, {$set: req.body}, {upsert: true, runValidators: true, context: 'query'})
+    .exec((error, data) => {
         if (error) {
             return next(error);
         } else {
@@ -74,8 +73,8 @@ imageExpressRoute.route('/image').put((req, res, next) => {
 })
 
 // Delete image
-imageExpressRoute.route('/remove-image/:id').delete((req, res, next) => {
-    ImageSchema.findByIdAndRemove(req.params.id, (error, data) => {
+imageExpressRoute.route('/remove-image/:imageName').delete((req, res, next) => {
+    ImageSchema.findOneAndRemove({name: req.params.imageName}, (error, data) => {
         if (error) {
             return next(error);
         } else {
@@ -85,5 +84,7 @@ imageExpressRoute.route('/remove-image/:id').delete((req, res, next) => {
         }
     })
 })
+
+// Get Combination
 
 module.exports = imageExpressRoute;

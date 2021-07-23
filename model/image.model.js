@@ -6,18 +6,22 @@ let imageSchema = new Schema({
         type: String
     },
     name: {
-        type: String
+        type: String, required: true, unique: true
     },
     repository: {
-        type: String
+        type: String, required: true 
     },
     version: {
-        type: String
+        type: String, required: true 
     },
     metaData: {
         type: Object
     }
-}, {
+},
+ {
+     timestamps: true
+ },
+ {
     collection: 'images'
 })
 
