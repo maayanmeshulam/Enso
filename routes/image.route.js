@@ -8,52 +8,67 @@ const imageExpressRoute = express.Router();
 let ImageSchema = require('../model/image.model');
 
 // Get images 
-// Add pagintion and sorting by date
-imageExpressRoute.route('/').get((req, res) => {
-    ImageSchema.find((error, data) => {
-        if (error) {
-            return next(error)
-        } else {
-            res.json(data)
-        }
-    })
+//*************** Add pagintion and sorting by date ***************
+imageExpressRoute.route('/image').get((req, res) => {
+    if (typeof req.query.imageName !== 'undefined' ){
+        ImageSchema.findOne({name: req.query.imageName}, (error, data) => {
+            if (error) {
+                return next(error)
+            } else {
+                res.json(data)
+            }
+        })
+    } else {
+        ImageSchema.find((error, data) => {
+            if (error) {
+                return next(error)
+            } else {
+                res.json(data)
+            }
+        })
+    }
 })
 
 // Create image
-imageExpressRoute.route('/create-image').post((req, res, next) => {
-    ImageSchema.create(req.body, (error, data) => {
-        if (error) {
-            return next(error)
-        } else {
-            res.json(data)
-        }
-    })
-});
+// imageExpressRoute.route('/image').post((req, res, next) => {
+//     ImageSchema.create(req.body, (error, data) => {
+//         if (error) {
+//             return next(error)
+//         } else {
+//             res.json(data)
+//         }
+//     })
+// });
 
 
 // Get single image
-imageExpressRoute.route('/get-image/:id').get((req, res) => {
-    ImageSchema.findById(req.params.id, (error, data) => {
-        if (error) {
-            return next(error)
-        } else {
-            res.json(data)
-        }
-    })
-})
+// imageExpressRoute.route('/image/:id').get((req, res) => {
+//     ImageSchema.findById(req.params.id, (error, data) => {
+//         if (error) {
+//             return next(error)
+//         } else {
+//             res.json(data)
+//         }
+//     })
+// })
 
 
 // Update image
 // if does not exist, create it
-imageExpressRoute.route('/update-image/:id').put((req, res, next) => {
-    ImageSchema.findByIdAndUpdate(req.params.id, {
-        $set: req.body
-    }, (error, data) => {
+//*************** need to check the required fields?? ***************
+imageExpressRoute.route('/image').put((req, res, next) => {
+    ImageSchema.findOneAndUpdate({name: req.body.name}, {$set: req.body}, {upsert: true},
+         (error, data) => {
         if (error) {
             return next(error);
         } else {
+            if (data){
+                console.log('Image successfully updated!')
+            }
+            else {
+                console.log('Image successfully created!')
+            }
             res.json(data)
-            console.log('Image successfully updated!')
         }
     })
 })

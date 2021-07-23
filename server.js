@@ -9,7 +9,9 @@ let express = require('express'),
 // Connecting mongoDB
 mongoose.Promise = global.Promise;
 mongoose.connect(dbConfig.db, {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
 }).then(() => {
         console.log('Database connected')
     },
